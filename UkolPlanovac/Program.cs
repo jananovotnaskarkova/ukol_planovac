@@ -15,18 +15,12 @@ class Program
 
                 if (input.Contains("EVENT;"))
                 {
-                    bool isEventValid;
-                    string name;
-                    DateTime date;
-                    Event newEvent;
-                    
-                    (isEventValid, name, date) = Event.CheckInput(input);
+                    (bool isEventValid, string name, DateTime date) = Event.ParseEvent(input);
 
                     if (isEventValid)
                     {
-                        newEvent = new Event(name, date);
-                        Event.AddEventToList(newEvent);
-                        Event.AddEventToCalendar(newEvent);
+                        Event newEvent = new Event(name, date);
+                        Event.AddEvent(newEvent);
                         isInputValid = true;
                     }
                     else

@@ -1,50 +1,47 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Globalization;
 
 namespace UkolPlanovac
 {
     public class Event
     {
-        private String EventName;
+        private string EventName;
         private DateTime EventDate;
 
         private static List<Event> EventList = [];
         private static Dictionary<DateTime, int> EventDict = [];
-        
+
         public Event(string name, DateTime date)
         {
             EventName = name;
             EventDate = date;
         }
 
-        public static (bool, string, DateTime) CheckInput(string input)
+        public static (bool IsValid, string Name, DateTime Date) ParseEvent(string input)
         {
-            String[] inputSplitted = input.Split(";");
+            string[] inputSplitted = input.Split(";");
             DateTime date = DateTime.Now;
-            bool result = false;
+            bool result = (
+                (inputSplitted.Length == 3) &&
+                (inputSplitted[0] == "EVENT") &&
+                DateTime.TryParseExact(
+                    inputSplitted[2],
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out date
+                )
+            );
 
-            if ((inputSplitted.Length == 3) && (inputSplitted[0] == "EVENT") && DateTime.TryParseExact(inputSplitted[2], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
-            {
-               result = true;                      
-            }
-
-            return (result, inputSplitted[1], date);  
+            return (result, inputSplitted[1], date);
         }
 
-        public static void AddEventToList(Event newEvent)
+        public static void AddEvent(Event newEvent)
         {
             EventList.Add(newEvent);
-        }
 
-        public static void AddEventToCalendar(Event newEvent)
-        {
             if (EventDict.ContainsKey(newEvent.EventDate))
             {
-                EventDict[newEvent.EventDate] ++; 
+                EventDict[newEvent.EventDate]++;
             }
             else
             {
@@ -59,10 +56,10 @@ namespace UkolPlanovac
             {
                 Console.WriteLine($"'{EventName}' with date {EventDate:yyyy-MM-dd} will happen in {remainingDays} days");
             }
-            else if (remainingDays < 0)
+            else
             {
                 Console.WriteLine($"'{EventName}' with date {EventDate:yyyy-MM-dd} happened {-remainingDays} days ago");
-            }            
+            }
         }
 
         public static void PrintList()
@@ -81,17 +78,12 @@ namespace UkolPlanovac
 
         public static void PrintStats()
         {
-            List<DateTime> DateList = [];
+            List<DateTime> DateList = EventDict.Select(d => d.Key).ToList();
 
             if (EventDict.Count() == 0)
             {
                 Console.WriteLine("Event statistics are empty");
                 return;
-            }
-
-            foreach (KeyValuePair<DateTime, int> entry in EventDict)
-            {
-                DateList.Add(entry.Key);
             }
 
             DateList.Sort();
@@ -100,6 +92,6 @@ namespace UkolPlanovac
             {
                 Console.WriteLine($"Date: {date:yyyy-MM-dd}: events: {EventDict[date]}");
             }
-        }        
+        }
     }
 }
